@@ -16,12 +16,8 @@ The Homework Tracker is a web-based application designed to help students keep t
 * View Daily Assignments: By clicking on a specific day, users can view all the homework assignments due on that day.
 
 ## needs fixing
-
-* current day isnt yellow anymore
 * small box appears on first reload + first click on day
+* editing the homework display doesnt properly update on the upcoming assignments list
 
 ## Improvement ideas
-* //done// current day glows, past days greyed out
-* running list of any assignments upcoming in next 3 days
 * when I click on a day I have option to add new assignment directly to the homework display
-* implement dayjs?

@@ -182,6 +182,8 @@ function updateHomeworkDetails(title, dueDate, newDetails) {
   if (hwIndex !== -1) {
     homeworks[hwIndex].details = newDetails;
     localStorage.setItem("homeworks", JSON.stringify(homeworks));
+    updateCalendar(); // Update the calendar
+    updateUpcomingAssignments(); // Update the upcoming assignments list
   }
 }
 
@@ -282,6 +284,20 @@ function deleteHomework(title) {
   updateCalendar();
   updateUpcomingAssignments();
 }
+
+function updateHomework(newTitle, newDueDate, newDetails, originalTitle) {
+  let homeworks = JSON.parse(localStorage.getItem("homeworks")) || [];
+  let hwIndex = homeworks.findIndex(hw => hw.title === originalTitle);
+  if (hwIndex !== -1) {
+      homeworks[hwIndex].title = newTitle;
+      homeworks[hwIndex].dueDate = newDueDate;
+      homeworks[hwIndex].details = newDetails;
+      localStorage.setItem("homeworks", JSON.stringify(homeworks));
+      updateCalendar(); // To reflect changes in the calendar
+      updateUpcomingAssignments(); // Refresh the upcoming assignments list
+  }
+}
+
 
 // SUMBISSION FORM
 document
