@@ -148,3 +148,60 @@ button:hover {
     max-height: 300px;
     overflow-y: auto; /* Allows scrolling if content is too long */
 }
+
+.current-day {
+    background-color: #4CAF50; /* color for the current day */
+    color: white; /* Change  if needed */
+}
+
+.past-day {
+    background-color: #adadad; /* color for past days */
+}
+
+#upcoming-assignments {
+    margin-left: 20px; 
+    padding: 10px;
+    border: 1px solid #ddd; 
+    border-radius: 5px;
+}
+#upcoming-list {
+    list-style: none;
+    padding: 0;
+}
+#upcoming-list li {
+    margin-bottom: 5px;
+    padding: 5px;
+    background-color: #f9f9f9;
+    border-radius: 3px;
+}
+
+#main-container {
+    display: flex;
+    justify-content: space-between;
+}
+
+#calendar, #upcoming-assignments {
+    flex-basis: 48%;
+}
+
+.delete-btn {
+    position: absolute;
+    top: 50%;     /* Adjust this value as needed */
+    right: 10px;  /* Adjust this value as needed */
+    transform: translateY(-50%);
+    display: none;
+    cursor: pointer;
+    color: #ff0000;
+    float: right;
+    font-weight: bold;
+    display: none; /* Hide by default */
+}
+
+.upcoming-item:hover .delete-btn {
+    display: inline; /* Show the delete button on hover of the list item */
+}
+
+.upcoming-item {
+    position: relative;
+    /* Other styles... */
+}

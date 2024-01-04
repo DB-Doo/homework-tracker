@@ -21,5 +21,7 @@ The Homework Tracker is a web-based application designed to help students keep t
 * small box appears on first reload + first click on day
 
 ## Improvement ideas
-* current day glows, past days greyed out
+* //done// current day glows, past days greyed out
 * running list of any assignments upcoming in next 3 days
+* when I click on a day I have option to add new assignment directly to the homework display
+* implement dayjs?
