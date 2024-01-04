@@ -15,27 +15,27 @@ function updateCalendar() {
   let calendarBody = document.getElementById("calendar-body");
   calendarBody.innerHTML = ""; // Clear existing calendar
 
+  let firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay();
+  // firstDayOfMonth is 0 (Sunday) to 6 (Saturday)
+
   let date = 1;
   for (let i = 0; i < 6; i++) {
     let row = document.createElement("tr");
 
     for (let j = 0; j < 7; j++) {
       let cell = document.createElement("td");
-      if (i === 0 && j < firstDay) {
-        let cellText = document.createTextNode("");
-        cell.appendChild(cellText);
+
+      if (i === 0 && j < firstDayOfMonth) {
+        // Before the start of the month, leave these cells empty
+        cell.appendChild(document.createTextNode(""));
       } else if (date > daysOfMonth) {
+        // After the end of the month, stop creating cells
         break;
       } else {
-        let cellText = document.createTextNode(date);
-        if (
-          date === new Date().getDate() &&
-          currentYear === new Date().getFullYear() &&
-          currentMonth === new Date().getMonth()
-        ) {
-          cell.classList.add("today");
-        }
-        cell.appendChild(cellText);
+        // Fill the cell with the date and any other content
+        cell.appendChild(document.createTextNode(date));
+        // ... code for adding homework indicators ...
+
         date++;
       }
       row.appendChild(cell);
@@ -58,27 +58,24 @@ function updateCalendar() {
 function displayHomework() {
   let homeworks = JSON.parse(localStorage.getItem("homeworks")) || [];
   homeworks.forEach((hw) => {
-    // Correctly parse the date
-    const [year, month, day] = hw.dueDate.split('-').map(num => parseInt(num, 10));
-    let dueDate = new Date(year, month - 1, day, 23, 59); // Set time to 23:59
+    // Parse the date in local time zone
+    let dateComponents = hw.dueDate.split('-');
+    let dueDate = new Date(dateComponents[0], dateComponents[1] - 1, dateComponents[2]);
 
     if (dueDate.getMonth() === currentMonth && dueDate.getFullYear() === currentYear) {
-      // Correctly find the cell for the due date
-      let calendarStartDate = new Date(currentYear, currentMonth, 1);
-      let startDayOfWeek = calendarStartDate.getDay();
-      let cellIndex = day + startDayOfWeek - 1; // Calculate the correct cell index
+      let dayOfMonth = dueDate.getDate();
+      let firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay();
+      
+      let cellIndex = dayOfMonth + firstDayOfMonth - 1;
+      let row = Math.floor(cellIndex / 7) + 1;
+      let column = (cellIndex % 7) + 1;
 
-      let cellRow = Math.ceil(cellIndex / 7);
-      let cellColumn = cellIndex % 7 + 1; // +1 because nth-child is 1-based
-
-      let cell = document.querySelector(
-        `#calendar-body tr:nth-child(${cellRow}) td:nth-child(${cellColumn})`
-      );
-      if (cell) {
+      let targetCell = document.querySelector(`#calendar-body tr:nth-child(${row}) td:nth-child(${column})`);
+      if (targetCell && targetCell.textContent.trim() === dayOfMonth.toString()) {
         let hwMarker = document.createElement("div");
         hwMarker.textContent = hw.title;
         hwMarker.className = "homework-marker";
-        cell.appendChild(hwMarker);
+        targetCell.appendChild(hwMarker);
       }
     }
   });
@@ -86,7 +83,22 @@ function displayHomework() {
 
 
 
+
+
 function displayHomeworkForDay(cell) {
+  // Declare displayDiv at the start of the function
+  let displayDiv = document.getElementById('homework-display');
+
+  // Hide existing display if it exists
+  if (displayDiv) {
+    displayDiv.style.display = 'none'; 
+  } else {
+    // Create displayDiv if it doesn't exist
+    displayDiv = document.createElement('div');
+    displayDiv.id = 'homework-display';
+    document.body.appendChild(displayDiv);
+  }
+  
   let day = parseInt(cell.textContent);
   if (!day) return; // Exit if the cell doesn't represent a day of the month
 
@@ -95,18 +107,9 @@ function displayHomeworkForDay(cell) {
 
   let homeworks = JSON.parse(localStorage.getItem('homeworks')) || [];
   let dueHomeworks = homeworks.filter(hw => hw.dueDate === dateStr);
-  
 
   if (dueHomeworks.length === 0) {
-      return; // No homework for this day, so don't show the box
-  }
-
-  // Check for an existing displayDiv, create if not exists
-  let displayDiv = document.getElementById('homework-display');
-  if (!displayDiv) {
-      displayDiv = document.createElement('div');
-      displayDiv.id = 'homework-display';
-      document.body.appendChild(displayDiv); // Append only if it's newly created
+    return; // No homework for this day, so don't show the box
   }
 
   displayDiv.innerHTML = ''; // Clear existing content
@@ -115,7 +118,7 @@ function displayHomeworkForDay(cell) {
   dueHomeworks.forEach(hw => {
     let hwDiv = document.createElement('div');
     hwDiv.classList.add('homework-item');
-    hwDiv.innerHTML = `<strong>${hw.title}</strong>: ${hw.details}`;
+    hwDiv.innerHTML = `<strong>${hw.title}</strong>: <span class='editable' contenteditable='true'>${hw.details}</span>`;
 
     // Create delete button
     let deleteBtn = document.createElement('span');
@@ -134,11 +137,14 @@ function displayHomeworkForDay(cell) {
         displayDiv.removeChild(hwDiv);
         if (displayDiv.children.length === 0) {
           displayDiv.style.display = 'none'; // Hide the display box
-          // Or, if you prefer to remove it entirely:
-          // displayDiv.parentNode.removeChild(displayDiv);
       }
         updateCalendar(); // Update the calendar to reflect changes
     };
+    let editableSpan = hwDiv.querySelector('.editable');
+        editableSpan.onblur = function() {
+            // Save the updated details
+            updateHomeworkDetails(hw.title, hw.dueDate, this.innerText);
+        };
 
     hwDiv.appendChild(deleteBtn);
     displayDiv.appendChild(hwDiv);
@@ -148,6 +154,16 @@ function displayHomeworkForDay(cell) {
   displayDiv.style.position = 'absolute';
   displayDiv.style.left = `${cell.getBoundingClientRect().left}px`;
   displayDiv.style.top = `${cell.getBoundingClientRect().bottom + 5}px`;
+  displayDiv.style.display = 'block';
+}
+
+function updateHomeworkDetails(title, dueDate, newDetails) {
+  let homeworks = JSON.parse(localStorage.getItem('homeworks')) || [];
+  let hwIndex = homeworks.findIndex(hw => hw.title === title && hw.dueDate === dueDate);
+  if (hwIndex !== -1) {
+      homeworks[hwIndex].details = newDetails;
+      localStorage.setItem('homeworks', JSON.stringify(homeworks));
+  }
 }
 
 // Delete homework function
@@ -206,3 +222,13 @@ document.getElementById("homework-form").addEventListener("submit", function (e)
 
 
 updateCalendar(); // Initial call to populate the calendar
+
+document.addEventListener('click', function(event) {
+  let displayDiv = document.getElementById('homework-display');
+  let calendarBody = document.getElementById('calendar-body');
+
+  // Check if the click is outside the homework display and not on a calendar day
+  if (displayDiv && !displayDiv.contains(event.target) && !calendarBody.contains(event.target)) {
+      displayDiv.style.display = 'none';
+  }
+});
