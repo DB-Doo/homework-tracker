@@ -7,3 +7,8 @@ The Homework Tracker is a web-based application designed to help students keep t
 Calendar View: Displays a monthly calendar where users can view the days marked with homework assignments.
 Add Assignments: Users can add homework assignments, specifying the title, details, and due date.
 View Daily Assignments: By clicking on a specific day, users can view all the homework assignments due on that day.
+
+## needs fixing
+
+current day isnt yellow anymore
+small box appears on first reload + first click on day
