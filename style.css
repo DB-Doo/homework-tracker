@@ -1,0 +1,150 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f4f4;
+    text-align: center;
+    padding: 20px;
+}
+
+#calendar {
+    margin: auto;
+    width: 90%;
+    max-width: 600px;
+    text-align: center;
+    background-color: white;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+#calendar table {
+    margin: auto; /* This will center the table in the div */
+    width: 100%; /* Adjust as necessary */
+}
+
+#calendar thead tr {
+    background-color: #0078D7; /* Modern blue */
+    color: white;
+}
+
+#calendar thead tr th {
+    padding: 10px;
+    text-align: center;
+    font-size: 16px;
+    font-weight: normal;
+}
+
+#calendar tbody tr td {
+    padding: 15px;
+    border: 1px solid #ddd;
+    color: #666;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+#calendar tbody tr td:hover {
+    background-color: #0078D7;
+    color: white;
+}
+
+#calendar tbody tr .today {
+    background-color: #FFD700; /* Gold color for today */
+    color: black;
+}
+
+#month-year {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+}
+
+#calendar-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+#calendar-header button, #calendar-header #month-year {
+    display: inline-block;
+    margin: 0 10px;
+}
+
+button {
+    padding: 10px 15px;
+    background-color: #0078D7;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #005cb2;
+}
+
+@media (max-width: 768px) {
+    #calendar {
+        width: 100%;
+        max-width: none;
+    }
+}
+
+
+/* submission form styles */
+#homework-tracker {
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: white;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+#homework-tracker input, #homework-tracker textarea {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+#homework-tracker button {
+    width: 100%;
+    padding: 10px;
+    background-color: #0078D7;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#homework-tracker button:hover {
+    background-color: #005cb2;
+}
+
+.homework-marker {
+    background-color: #FF5733; /* Homework marker color */
+    color: white;
+    padding: 5px;
+    margin-top: 5px;
+    border-radius: 3px;
+    font-size: 12px;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+#homework-display {
+    position: absolute;
+    background-color: white;
+    border: 1px solid #ddd;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    top: 100px; /* Adjust as needed */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    color: black; /* Ensure text color is visible */
+    width: auto; /* or set a fixed width */
+    max-height: 300px;
+    overflow-y: auto; /* Allows scrolling if content is too long */
+}
