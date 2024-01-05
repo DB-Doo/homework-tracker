@@ -101,12 +101,12 @@ function displayHomework() {
 }
 
 function displayHomeworkForDay(cell) {
-  // Declare displayDiv at the start of the function
   let displayDiv = document.getElementById("homework-display");
 
-  // Hide existing display if it exists
+  // Hide existing display if it exists and clear content
   if (displayDiv) {
     displayDiv.style.display = "none";
+    displayDiv.innerHTML = ""; // Clear existing content
   } else {
     // Create displayDiv if it doesn't exist
     displayDiv = document.createElement("div");
@@ -114,39 +114,42 @@ function displayHomeworkForDay(cell) {
     document.body.appendChild(displayDiv);
   }
 
+  // 'Add Assignment' button - always displayed
+  let addBtn = document.createElement("button");
+  addBtn.textContent = "Add Assignment";
+  addBtn.className = "add-assignment-btn";
+  addBtn.onclick = function () {
+    let clickedDate = new Date(currentYear, currentMonth, parseInt(cell.textContent));
+    addNewHomework(clickedDate); // Function to add new homework
+  };
+  displayDiv.appendChild(addBtn);
+
+  // Determine if the clicked cell represents a day of the month
   let day = parseInt(cell.textContent);
-  if (!day) return; // Exit if the cell doesn't represent a day of the month
+  if (!day) return;
 
-  let clickedDate = new Date(currentYear, currentMonth, day);
-  let dateStr = `${clickedDate.getFullYear()}-${String(
-    clickedDate.getMonth() + 1
-  ).padStart(2, "0")}-${String(clickedDate.getDate()).padStart(2, "0")}`;
-
+  let clickedDateStr = formatDate(currentYear, currentMonth, day);
   let homeworks = JSON.parse(localStorage.getItem("homeworks")) || [];
-  let dueHomeworks = homeworks.filter((hw) => hw.dueDate === dateStr);
-
-  if (dueHomeworks.length === 0) {
-    return; // No homework for this day, so don't show the box
-  }
-
-  displayDiv.innerHTML = ""; // Clear existing content
+  let dueHomeworks = homeworks.filter(hw => hw.dueDate === clickedDateStr);
 
   // Add homework details to the display
-  dueHomeworks.forEach((hw) => {
+  dueHomeworks.forEach(hw => {
     let hwDiv = document.createElement("div");
     hwDiv.classList.add("homework-item");
     hwDiv.innerHTML = `<strong>${hw.title}</strong>: <span class='editable' contenteditable='true'>${hw.details}</span>`;
-
+    
+    // saving edits
+    let detailsSpan = hwDiv.querySelector('.editable');
+    detailsSpan.onblur = () => {
+        let newDetails = detailsSpan.textContent;
+        updateHomeworkDetails(hw.title, hw.dueDate, newDetails);
+    };
     // Create delete button
     let deleteBtn = document.createElement("span");
     deleteBtn.textContent = " X";
     deleteBtn.classList.add("delete-btn");
     deleteBtn.style.cursor = "pointer";
-    deleteBtn.style.display = "none"; // Initially hidden
-
-    // Show delete button on hover
-    hwDiv.onmouseenter = () => (deleteBtn.style.display = "inline");
-    hwDiv.onmouseleave = () => (deleteBtn.style.display = "none");
+    deleteBtn.style.display = "inline"; // Keep delete button always visible
 
     // Delete functionality
     deleteBtn.onclick = () => {
@@ -156,11 +159,6 @@ function displayHomeworkForDay(cell) {
         displayDiv.style.display = "none"; // Hide the display box
       }
       updateCalendar(); // Update the calendar to reflect changes
-    };
-    let editableSpan = hwDiv.querySelector(".editable");
-    editableSpan.onblur = function () {
-      // Save the updated details
-      updateHomeworkDetails(hw.title, hw.dueDate, this.innerText);
     };
 
     hwDiv.appendChild(deleteBtn);
@@ -174,6 +172,37 @@ function displayHomeworkForDay(cell) {
   displayDiv.style.display = "block";
 }
 
+function formatDate(year, month, day) {
+  return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+}
+
+
+//
+function addNewHomework(date) {
+  // Logic to input new homework details
+  // This could be a modal or a simple prompt
+  let title = prompt("Enter Homework Title:");
+  if (!title) return; // Exit if no title is entered
+
+  let details = prompt("Enter Homework Details:");
+  if (!details) return; // Exit if no details are entered
+
+  let homeworkData = {
+    title: title,
+    details: details,
+    dueDate: date.toISOString().substring(0, 10), // Format date as YYYY-MM-DD
+  };
+
+  // Save to localStorage
+  let homeworks = JSON.parse(localStorage.getItem("homeworks")) || [];
+  homeworks.push(homeworkData);
+  localStorage.setItem("homeworks", JSON.stringify(homeworks));
+
+  updateCalendar(); // Update the calendar with new homework
+  updateUpcomingAssignments(); // Update the upcoming assignments list
+
+}
+
 function updateHomeworkDetails(title, dueDate, newDetails) {
   let homeworks = JSON.parse(localStorage.getItem("homeworks")) || [];
   let hwIndex = homeworks.findIndex(
@@ -182,8 +211,8 @@ function updateHomeworkDetails(title, dueDate, newDetails) {
   if (hwIndex !== -1) {
     homeworks[hwIndex].details = newDetails;
     localStorage.setItem("homeworks", JSON.stringify(homeworks));
-    updateCalendar(); // Update the calendar
-    updateUpcomingAssignments(); // Update the upcoming assignments list
+    updateCalendar();
+    updateUpcomingAssignments();
   }
 }
 
@@ -219,15 +248,19 @@ function updateUpcomingAssignments() {
   let upcomingList = document.getElementById("upcoming-list");
   upcomingList.innerHTML = "";
 
+  let today = new Date();
+    // Reset hours, minutes, seconds, and milliseconds to compare only dates
+    today.setHours(0, 0, 0, 0)
+
   let homeworks = JSON.parse(localStorage.getItem("homeworks")) || [];
   let upcomingHomeworks = homeworks
-    .filter((hw) => new Date(hw.dueDate) >= new Date())
+    .filter(hw => new Date(hw.dueDate) >= today)
     .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
-    .slice(0, 3);
+    .slice(0, 5);
 
-  upcomingHomeworks.forEach((hw, index) => {
-    let listItem = document.createElement("li");
-    listItem.className = "upcoming-item";
+    upcomingHomeworks.forEach(hw => {
+      let listItem = document.createElement("li");
+      listItem.className = "upcoming-item";
 
     // Container for editable content
     let contentContainer = document.createElement("div");
@@ -260,9 +293,10 @@ function updateUpcomingAssignments() {
     detailsDiv.textContent = hw.details;
     detailsDiv.contentEditable = true;
     detailsDiv.className = "editable-details";
-    detailsDiv.onblur = () =>
-      updateHomework(hw.title, hw.dueDate, detailsDiv.textContent, hw.title);
-    contentContainer.appendChild(detailsDiv);
+    detailsDiv.onblur = () => {
+      let newDetails = detailsDiv.textContent;
+      updateHomeworkDetails(hw.title, hw.dueDate, newDetails);
+    };
 
     listItem.appendChild(contentContainer);
 
@@ -287,17 +321,16 @@ function deleteHomework(title) {
 
 function updateHomework(newTitle, newDueDate, newDetails, originalTitle) {
   let homeworks = JSON.parse(localStorage.getItem("homeworks")) || [];
-  let hwIndex = homeworks.findIndex(hw => hw.title === originalTitle);
+  let hwIndex = homeworks.findIndex((hw) => hw.title === originalTitle);
   if (hwIndex !== -1) {
-      homeworks[hwIndex].title = newTitle;
-      homeworks[hwIndex].dueDate = newDueDate;
-      homeworks[hwIndex].details = newDetails;
-      localStorage.setItem("homeworks", JSON.stringify(homeworks));
-      updateCalendar(); // To reflect changes in the calendar
-      updateUpcomingAssignments(); // Refresh the upcoming assignments list
+    homeworks[hwIndex].title = newTitle;
+    homeworks[hwIndex].dueDate = newDueDate;
+    homeworks[hwIndex].details = newDetails;
+    localStorage.setItem("homeworks", JSON.stringify(homeworks));
+    updateCalendar(); // To reflect changes in the calendar
+    updateUpcomingAssignments(); // Refresh the upcoming assignments list
   }
 }
-
 
 // SUMBISSION FORM
 document
