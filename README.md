@@ -21,6 +21,7 @@ The Homework Tracker is a web-based application designed to help students keep t
 * the x button on homework display isnt showing up properly next to each item in the list
 * todays assignments dont show up in upcoming list ////
 * notes dont show up on upcoming list
+* if you change date in notes to invalid date the whole item dissapears
 
 
 
